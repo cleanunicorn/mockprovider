@@ -20,6 +20,7 @@ contract MockProviderTest is DSTest {
             MockProvider.ReturnData({success: true, data: response})
         );
 
+        // solhint-disable-next-line
         (bool okReceived, bytes memory responseReceived) = address(mockProvider)
             .call(abi.encode(query));
 
@@ -38,9 +39,11 @@ contract MockProviderTest is DSTest {
         bytes memory response = hex"5678";
         mockProvider.givenQueryReturnResponse(
             query,
-            MockProvider.ReturnData({success: true, data: response})
+            MockProvider.ReturnData({success: true, data: response}),
+            false
         );
 
+        // solhint-disable-next-line
         (bool okReceived, bytes memory responseReceived) = address(mockProvider)
             .call(query);
 
@@ -59,11 +62,12 @@ contract MockProviderTest is DSTest {
         bytes memory query = hex"1234";
         mockProvider.givenQueryReturnResponse(
             query,
-            MockProvider.ReturnData({success: false, data: hex""})
+            MockProvider.ReturnData({success: false, data: hex""}),
+            false
         );
 
-        (bool okReceived, bytes memory responseReceived) = address(mockProvider)
-            .call(query);
+        // solhint-disable-next-line
+        (bool okReceived, ) = address(mockProvider).call(query);
 
         assertTrue(okReceived == false, "Should fail doing a call");
     }
