@@ -16,3 +16,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Upgrade [`cachix/install-nix-action`](https://github.com/cachix/install-nix-action) from `v13` to `v16`
+- Downgrade Solidity test version from `0.8.10` to `0.8.7` since it cannot find `0.8.10`
