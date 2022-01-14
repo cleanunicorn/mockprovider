@@ -129,7 +129,7 @@ provider.givenQueryReturnResponse(
 You could check the responses to be correct in your tests:
 
 ```solidity
-// Cast the mock provider as IOddEven to get easy access to 
+// Cast the mock provider as IOddEven to get easy access to
 // the methods `getOdd()` and `getEven()`
 IOddEven mockOddEven = IOddEven(address(provider));
 
@@ -137,7 +137,29 @@ IOddEven mockOddEven = IOddEven(address(provider));
 uint256 oddNumber = mockOddEven.getOdd();
 assertTrue(oddNumber % 2 == 1, "Expected odd number");
 uint256 evenNumber = mockOddEven.getEven();
-assertTrue(evenNumber % 2 == 0, "Expected even number");   
+assertTrue(evenNumber % 2 == 0, "Expected even number");
+```
+
+### Return specific response for a given function selector
+
+You can set different responses for different selectors with `givenSelectorReturnResponse`.
+
+Mocking the same interface as the previous example
+
+You can make the provider return the `false` whenever `isEven` is called:
+
+```solidity
+// Make it return false whenever calling .isEven(anything)
+provider.givenSelectorReturnResponse(
+    // Respond to `.getOdd()`
+    abi.encodePacked(IOddEven.isEven.selector),
+    // Encode the response
+    MockProvider.ReturnData({
+        success: true,
+        data: abi.encodePacked(bool(false))
+    }),
+    false
+);
 ```
 
 ### Logging requests
