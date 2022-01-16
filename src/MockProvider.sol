@@ -51,43 +51,50 @@ contract MockProvider {
         givenQueryLog[queryKey] = log;
     }
 
+    function givenSelectorReturnResponse(
+        bytes4 selector_,
+        ReturnData memory returnData_,
+        bool log
+    ) external {
+        bytes32 queryKey = keccak256(abi.encode(selector_));
+        givenQueryReturn[queryKey] = returnData_;
+        givenQuerySet[queryKey] = true;
+        givenQueryLog[queryKey] = log;
+    }
+
     // prettier-ignore
     fallback(bytes calldata query_) external payable returns (bytes memory){
         bytes32 queryKey = keccak256(query_);
+        bytes32 selectorKey = keccak256(abi.encode(msg.sig));
         // Check if any set query matches the current query
-        if (givenQuerySet[queryKey]) {
-            // Log call
-            CallData memory newCallData = CallData({
-                caller: msg.sender,
-                functionSelector: msg.sig,
-                data: msg.data,
-                value: msg.value
-            });
+        if (givenQuerySet[queryKey] || givenQuerySet[selectorKey]) {
+            bytes32 key = givenQuerySet[queryKey] ? queryKey : selectorKey;
 
-            if (givenQueryLog[queryKey]) {
-                callData.push(newCallData);
+            // Log call
+            if (givenQueryLog[key]) {
+                _logCall();
             }
 
             // Return data as specified by the query
-            ReturnData memory returnData = givenQueryReturn[queryKey];
-            if (returnData.success) {
-                return returnData.data;
-            } else {
-                require(false, string(returnData.data));
-            }
+            ReturnData memory returnData = givenQueryReturn[key];
+            require(returnData.success, string(returnData.data));
+            return returnData.data;
         } else {
             // Default to sending the default response
-            CallData memory newCallData = CallData({
-                caller: msg.sender,
-                functionSelector: msg.sig,
-                data: msg.data,
-                value: msg.value
-            });
-
-            callData.push(newCallData);
-
+            _logCall();
             ReturnData memory returnData = defaultReturnData;
             return returnData.data;
         }
+    }
+
+    function _logCall() internal {
+        CallData memory newCallData = CallData({
+            caller: msg.sender,
+            functionSelector: msg.sig,
+            data: msg.data,
+            value: msg.value
+        });
+
+        callData.push(newCallData);
     }
 }
