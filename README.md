@@ -162,6 +162,13 @@ provider.givenSelectorReturnResponse(
 );
 ```
 
+Setting `givenSelectorReturnResponse` will make the provider return `false` for any call to `isEven`, without the need to specify *all* the numbers.
+
+```solidity
+provider.isEven(1) == false
+provider.isEven(42) == false
+```
+
 ### Logging requests
 
 When using `givenQueryReturnResponse` you can also log the request. The 3rd parameter is a boolean that indicates if the request should be logged.
