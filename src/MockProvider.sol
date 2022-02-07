@@ -87,6 +87,10 @@ contract MockProvider {
         }
     }
 
+    receive() external payable {
+        this;
+    }
+
     function _logCall() internal {
         CallData memory newCallData = CallData({
             caller: msg.sender,
