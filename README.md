@@ -106,6 +106,7 @@ provider.givenQueryReturnResponse(
         success: true,
         data: abi.encodePacked(uint256(1))
     }),
+    // Log the event
     false
 );
 ```
@@ -122,6 +123,7 @@ provider.givenQueryReturnResponse(
         success: true,
         data: abi.encodePacked(uint256(2))
     }),
+    // Log the event
     false
 );
 ```
@@ -158,6 +160,7 @@ provider.givenSelectorReturnResponse(
         success: true,
         data: abi.encodePacked(bool(false))
     }),
+    // Log the event
     false
 );
 ```
