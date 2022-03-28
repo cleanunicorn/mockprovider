@@ -9,44 +9,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-      - uses: cachix/install-nix-action@v16
-      - uses: cachix/cachix-action@v10
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1.0.6
         with:
-          name: dapp
+          version: nightly
+
+      - name: Install node
+        uses: actions/setup-node@v2
+
+      - name: Clone repo with submodules
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install yarn
+        run: npm i -g yarn
 
       - name: Install dependencies
-        run: nix-shell --run 'make'
+        run: make
+
+      - name: Show Foundry config
+        run: forge config
         
       - name: Check contracts are linted
         run: yarn lint:check
 
       - name: Run tests
-        run: nix-shell --run 'make test'
-        # Enable this if using forking tests
-        # env:
-        #  ETH_RPC_URL: https://eth-mainnet.alchemyapi.io/v2/${{ secrets.ALCHEMY_API_KEY }}
-
-  deep-tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-      - uses: cachix/install-nix-action@v16
-      - uses: cachix/cachix-action@v10
-        with:
-          name: dapp
-
-      - name: Install dependencies
-        run: nix-shell --run 'make'
-
-      - name: Build the contracts
-        run: nix-shell --run 'make build'
-
-      - name: Fuzz test
-        run: nix-shell --run 'make test-fuzz'
-      
-      - name: Coverage
-        run: nix-shell --run 'make test-coverage'        
+        run: make test
