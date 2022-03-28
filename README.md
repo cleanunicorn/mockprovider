@@ -187,9 +187,3 @@ Check the [full example in the examples repository](https://github.com/cleanunic
 ```sh
 make test
 ```
-
-### Fuzz testing
-
-```sh
-make test-fuzz
-```
