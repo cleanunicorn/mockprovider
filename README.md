@@ -153,7 +153,7 @@ You can make the provider return the `false` whenever `isEven` is called:
 ```solidity
 // Make it return false whenever calling .isEven(anything)
 provider.givenSelectorReturnResponse(
-    // Respond to `.getOdd()`
+    // Respond to `.isEven()`
     abi.encodePacked(IOddEven.isEven.selector),
     // Encode the response
     MockProvider.ReturnData({
