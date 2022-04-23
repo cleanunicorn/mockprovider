@@ -1,7 +1,7 @@
 ### Description
 
 <!-- 
-Overall description of the pull request. 
+Overall pull request description. 
 Can include:
 - A description or summary of the bug / feature
 - How the bug / feature was implemented
