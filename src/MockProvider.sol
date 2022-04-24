@@ -9,10 +9,10 @@ contract MockProvider {
         uint256 value;
     }
 
-    CallData[] internal callData;
+    CallData[] internal _callData;
 
     function getCallData(uint256 index_) public view returns (CallData memory) {
-        if (index_ >= callData.length) {
+        if (index_ >= _callData.length) {
             return
                 CallData({
                     caller: address(0),
@@ -21,7 +21,7 @@ contract MockProvider {
                     value: uint256(0)
                 });
         }
-        return callData[index_];
+        return _callData[index_];
     }
 
     struct ReturnData {
@@ -32,7 +32,7 @@ contract MockProvider {
     /// @dev Define fallback response for all calls.
     ReturnData internal defaultReturnData;
 
-    mapping(bytes32 => ReturnData) public givenQueryReturn;
+    mapping(bytes32 => ReturnData) public _givenQueryReturn;
     mapping(bytes32 => bool) public givenQuerySet;
     mapping(bytes32 => bool) public givenQueryLog;
 
@@ -44,22 +44,54 @@ contract MockProvider {
         bytes memory query_,
         ReturnData memory returnData_,
         bool log
-    ) external {
+    ) public {
         bytes32 queryKey = keccak256(query_);
-        givenQueryReturn[queryKey] = returnData_;
+        _givenQueryReturn[queryKey] = returnData_;
         givenQuerySet[queryKey] = true;
         givenQueryLog[queryKey] = log;
     }
+
+    function givenQueryReturn(bytes memory query_, bytes memory response_)
+        public
+    {
+        // Forward call
+        givenQueryReturnResponse(
+            query_,
+            ReturnData({success: true, data: response_}),
+            false
+        );
+    }
+
+    // function givenLoggedQueryReturn(bytes memory query_, bytes memory response_)
+    //     public
+    // {
+    //     // Forward call
+    //     givenQueryReturnResponse(
+    //         query_,
+    //         ReturnData({success: true, data: response_}),
+    //         true
+    //     );
+    // }
 
     function givenSelectorReturnResponse(
         bytes4 selector_,
         ReturnData memory returnData_,
         bool log
-    ) external {
+    ) public {
         bytes32 queryKey = keccak256(abi.encode(selector_));
-        givenQueryReturn[queryKey] = returnData_;
+        _givenQueryReturn[queryKey] = returnData_;
         givenQuerySet[queryKey] = true;
         givenQueryLog[queryKey] = log;
+    }
+
+    function givenSelectorReturn(bytes4 selector_, bytes memory response_)
+        public
+    {
+        givenSelectorReturnResponse(
+            selector_,
+            ReturnData({success: true, data: response_}),
+            false
+        );
     }
 
     // prettier-ignore
@@ -76,7 +108,7 @@ contract MockProvider {
             }
 
             // Return data as specified by the query
-            ReturnData memory returnData = givenQueryReturn[key];
+            ReturnData memory returnData = _givenQueryReturn[key];
             require(returnData.success, string(returnData.data));
             return returnData.data;
         } else {
@@ -99,6 +131,6 @@ contract MockProvider {
             value: msg.value
         });
 
-        callData.push(newCallData);
+        _callData.push(newCallData);
     }
 }
