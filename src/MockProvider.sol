@@ -35,17 +35,6 @@ contract MockProvider {
     /// @dev Define fallback response for all calls.
     ReturnData internal _defaultReturnData;
 
-    /// @notice Returns the logged call data for a given index
-    /// @dev If the provided index is out of bounds, it reverts
-    /// @param index_ The index of the call data to return
-    /// @return CallData structure containing the logged call data
-    function getCallData(uint256 index_) public view returns (CallData memory) {
-        if (index_ >= _callData.length) {
-            revert MockProvider__getCallData_indexOutOfBounds(index_);
-        }
-        return _callData[index_];
-    }
-
     /// @notice Contains the mapping from the expected query to the return data
     /// @dev keccak256(query) => ReturnData
     mapping(bytes32 => ReturnData) internal _givenQueryReturn;
@@ -58,10 +47,28 @@ contract MockProvider {
     /// @dev keccak256(query) => bool
     mapping(bytes32 => bool) internal _givenQueryLog;
 
+    /// @notice Returns the logged call data for a given index
+    /// @dev If the provided index is out of bounds, it reverts
+    /// @param index_ The index of the call data to return
+    /// @return CallData structure containing the logged call data
+    function getCallData(uint256 index_) public view returns (CallData memory) {
+        if (index_ >= _callData.length) {
+            revert MockProvider__getCallData_indexOutOfBounds(index_);
+        }
+        return _callData[index_];
+    }
+
     /// @notice Defines the default return in case no query matches
     /// @param returnData_ The return data to return
-    function setDefaultResponse(ReturnData memory returnData_) external {
+    function setDefaultResponse(ReturnData memory returnData_) public {
         _defaultReturnData = returnData_;
+    }
+
+    /// @notice Defines the default return in case no query matches
+    /// @param response_ The return data to return
+    function setDefault(bytes memory response_) external {
+        // Forward execution
+        setDefaultResponse(ReturnData({success: true, data: response_}));
     }
 
     /// @notice Defines the return data for a given query
@@ -93,7 +100,7 @@ contract MockProvider {
     function givenQueryReturn(bytes memory query_, bytes memory response_)
         public
     {
-        // Forward call
+        // Forward execution
         givenQueryReturnResponse(
             query_,
             ReturnData({success: true, data: response_}),
