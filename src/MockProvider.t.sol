@@ -174,4 +174,8 @@ contract MockProviderTest is DSTest {
         );
         assertEq(cd.value, 0, "Logged message value should match");
     }
+
+    function test_getCallData_ReturnsError_WhenRequestedIndexIsOutOfBounds()
+        public
+    {}
 }
