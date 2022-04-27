@@ -29,11 +29,8 @@ It will create a new folder in `lib` named `mockprovider`.
 MockProvider provider = new MockProvider();
 
 // Make the provider successfully respond with 42 for any request
-provider.setDefaultResponse(
-    MockProvider.ReturnData({
-        success: true,
-        data: abi.encode(uint256(42))
-    })
+provider.setDefault(
+    abi.encode(uint256(42)
 );
 ```
 
@@ -53,7 +50,7 @@ assertTrue(success, "Expected success");
 assertEq(result, 42, "Expected 42");
 ```
 
-Alternatively, and most commonly, you will mock a contract that does needs to return a value.
+Alternatively, and most commonly, you will mock a contract's method that needs to return a value.
 
 Considering you have this contract you need to mock:
 
@@ -66,16 +63,24 @@ interface ITheAnswer {
 You can just call the method, once the provider was set to return a response:
 
 ```solidity
+// Cast the contract as `ITheAnswer` to easily call `.theUltimateQuestionOfLifeTheUniverseAndEverything()`
 ITheAnswer theAnswer = ITheAnswer(address(provider));
 
+// Mock the answer to everything
+provider.setDefault(
+    abi.encode(uint256(42)
+);
+
+// Make the call
 uint256 theUltimateAnswer = theAnswer.theUltimateQuestionOfLifeTheUniverseAndEverything();
 
+// Check the answer
 assertEq(theUltimateAnswer, 42, "Expected 42");
 ```
 
 ### Return specific response for specific request
 
-You can set different responses for different requests with `givenQueryReturnResponse`.
+You can set different responses for different requests with `givenQueryReturn`.
 
 Consider you want to mock this interface
 
@@ -98,16 +103,11 @@ You can make the provider return the number `1` when `getOdd` is called:
 
 ```solidity
 // Make it return 1 when calling .getOdd()
-provider.givenQueryReturnResponse(
+provider.givenQueryReturn(
     // Respond to `.getOdd()`
     abi.encodePacked(IOddEven.getOdd.selector),
-    // Encode the response
-    MockProvider.ReturnData({
-        success: true,
-        data: abi.encodePacked(uint256(1))
-    }),
-    // Log the event
-    false
+    // With `true`
+    abi.encodePacked(uint256(1))
 );
 ```
 
@@ -115,16 +115,11 @@ And return the number `2` when `getEven` is called:
 
 ```solidity
 // Make it return 2 when calling .getEven()
-provider.givenQueryReturnResponse(
+provider.givenQueryReturn(
     // Respond to `.getEven()`
     abi.encodePacked(IOddEven.getEven.selector),
-    // Encode the response
-    MockProvider.ReturnData({
-        success: true,
-        data: abi.encodePacked(uint256(2))
-    }),
-    // Log the event
-    false
+    // With `2`
+    abi.encodePacked(uint256(2))
 );
 ```
 
