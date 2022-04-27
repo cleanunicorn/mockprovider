@@ -18,10 +18,7 @@ contract MockProviderTest is DSTest {
         uint256 queryValue = 1;
 
         mockProvider.setDefaultResponse(
-            MockProvider.ReturnData({
-                success: true,
-                data: query
-            })
+            MockProvider.ReturnData({success: true, data: query})
         );
 
         // solhint-disable-next-line avoid-low-level-calls
@@ -43,9 +40,9 @@ contract MockProviderTest is DSTest {
         mockProvider.getCallData(0);
     }
 
-    function test_setDefaultResponse_Enables_ReturnResponseOnQuery(bytes memory response_)
-        public
-    {
+    function test_setDefaultResponse_Enables_ReturnResponseOnQuery(
+        bytes memory response_
+    ) public {
         bytes memory query = hex"11223344";
 
         mockProvider.setDefaultResponse(
@@ -64,13 +61,16 @@ contract MockProviderTest is DSTest {
         );
     }
 
-    function test_setDefault_Enables_ReturnResponseOnQuery(bytes memory response_) public {
+    function test_setDefault_Enables_ReturnResponseOnQuery(
+        bytes memory response_
+    ) public {
         bytes memory query = hex"11223344";
 
         mockProvider.setDefault(response_);
 
         // solhint-disable-next-line avoid-low-level-calls
-        (bool okReceived, bytes memory responseReceived) = address(mockProvider).call(query);
+        (bool okReceived, bytes memory responseReceived) = address(mockProvider)
+            .call(query);
 
         assertTrue(okReceived, "Should not fail doing a call");
         assertEq(
@@ -103,13 +103,12 @@ contract MockProviderTest is DSTest {
         );
     }
 
-    function test_givenQueryReturn_Enables_ReturnResponseOnQuery(bytes memory response_) public {
+    function test_givenQueryReturn_Enables_ReturnResponseOnQuery(
+        bytes memory response_
+    ) public {
         bytes memory query = hex"11223344";
 
-        mockProvider.givenQueryReturn(
-            query,
-            response_
-        );
+        mockProvider.givenQueryReturn(query, response_);
 
         // solhint-disable-next-line avoid-low-level-calls
         (bool okReceived, bytes memory responseReceived) = address(mockProvider)
@@ -148,13 +147,12 @@ contract MockProviderTest is DSTest {
         );
     }
 
-    function test_givenSelectorReturn_Enables_ReturnResponseOnQuery(bytes memory params_,
-        bytes memory response_) public {
+    function test_givenSelectorReturn_Enables_ReturnResponseOnQuery(
+        bytes memory params_,
+        bytes memory response_
+    ) public {
         bytes4 selector = hex"11223344";
-        mockProvider.givenSelectorReturn(
-            selector,
-            response_
-        );
+        mockProvider.givenSelectorReturn(selector, response_);
 
         bytes memory query = abi.encodePacked(selector, params_);
 
@@ -167,7 +165,7 @@ contract MockProviderTest is DSTest {
             keccak256(response_),
             keccak256(responseReceived),
             "Returned response should match"
-        );        
+        );
     }
 
     function test_givenQueryReturnResponse_Fails_WithErrorMessage() public {
