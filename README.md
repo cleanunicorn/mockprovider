@@ -169,13 +169,9 @@ provider.isEven(42) == false
 
 ### Logging requests
 
-When using `givenQueryReturnResponse` you can also log the request. The 3rd parameter is a boolean that indicates if the request should be logged.
+When using `givenQueryReturnResponse` or `givenSelectorReturnResponse` you can also log the requests. The 3rd parameter is a boolean that indicates if the request should be logged.
 
 Let's assume you want to test a contract that makes a call into an external contract. The external contract could be a smart contract that you do not develop, or one that already exists on the blockchain, or even a contract that you develop but needs a complex deployment system. Thus, you want that contract to be mocked and you need to know if it was called.
-
-In this example we need to implement a contract that reports even numbers (and only even numbers) to an external contract. Our unit test needs to check that the external contract is called with the correct arguments. We prefer not to create the external contract, thus we'll mock it and check if it was called.
-
-Check the [full example in the examples repository](https://github.com/cleanunicorn/mockprovider-examples/blob/e051cdb1e1eef4bdb1bb64d8ea1a5958b3a76869/src/reportNumber/ReportNumber.t.sol#L30-L58).
 
 ## Testing
 
