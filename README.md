@@ -4,8 +4,6 @@ A library for mocking Solidity contracts.
 
 Instead of importing heavy contracts and making sure the setup is complete and correct, you might only need a library to return a value. This library is designed to be used in tests and return values for the contracts you are testing.
 
-
-
 ## Installation
 
 ### Dapptools project
