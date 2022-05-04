@@ -4,9 +4,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+### Changed
+
+
+### Removed
+
+
+## [2.0.0] - 2022-05-01
+
+### Added
+
+- Comments for all code
+- `setDefault(bytes memory response_)` method to define a default response for arbitrary requests
+- `givenQueryReturn(bytes memory query_, bytes memory response_)` method to define a response for a specified query
+- `givenSelectorReturn(bytes4 selector_, bytes memory response_)` method to define a response for a specified selector (`msg.sig`)
+- More tests
+
+### Changed
+
+- README.md to describe the current state of your project
+- `lib/ds-test` to `2c7dbcc8586b33f358e3307a443e524490c17666`
+- `getCallData(uint256 index_)` returns an error `MockProvider__getCallData_indexOutOfBounds(uint256 index)` if an out of bounds `index_` is provided; previously it was returning an empty response
+
 ## [1.0.0] - 2022-03-28
 
-### Added 
+### Added
 
 - `getCallData` to return logged requests
 - `givenQueryReturnResponse` to make the provider return a specific response for a request

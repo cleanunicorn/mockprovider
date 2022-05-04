@@ -4,8 +4,6 @@ A library for mocking Solidity contracts.
 
 Instead of importing heavy contracts and making sure the setup is complete and correct, you might only need a library to return a value. This library is designed to be used in tests and return values for the contracts you are testing.
 
-
-
 ## Installation
 
 ### Dapptools project
@@ -29,11 +27,8 @@ It will create a new folder in `lib` named `mockprovider`.
 MockProvider provider = new MockProvider();
 
 // Make the provider successfully respond with 42 for any request
-provider.setDefaultResponse(
-    MockProvider.ReturnData({
-        success: true,
-        data: abi.encode(uint256(42))
-    })
+provider.setDefault(
+    abi.encode(uint256(42)
 );
 ```
 
@@ -53,7 +48,7 @@ assertTrue(success, "Expected success");
 assertEq(result, 42, "Expected 42");
 ```
 
-Alternatively, and most commonly, you will mock a contract that does needs to return a value.
+Alternatively, and most commonly, you will mock a contract's method that needs to return a value.
 
 Considering you have this contract you need to mock:
 
@@ -66,16 +61,24 @@ interface ITheAnswer {
 You can just call the method, once the provider was set to return a response:
 
 ```solidity
+// Cast the contract as `ITheAnswer` to easily call `.theUltimateQuestionOfLifeTheUniverseAndEverything()`
 ITheAnswer theAnswer = ITheAnswer(address(provider));
 
+// Mock the answer to everything
+provider.setDefault(
+    abi.encode(uint256(42)
+);
+
+// Make the call
 uint256 theUltimateAnswer = theAnswer.theUltimateQuestionOfLifeTheUniverseAndEverything();
 
+// Check the answer
 assertEq(theUltimateAnswer, 42, "Expected 42");
 ```
 
 ### Return specific response for specific request
 
-You can set different responses for different requests with `givenQueryReturnResponse`.
+You can set different responses for different requests with `givenQueryReturn`.
 
 Consider you want to mock this interface
 
@@ -98,16 +101,11 @@ You can make the provider return the number `1` when `getOdd` is called:
 
 ```solidity
 // Make it return 1 when calling .getOdd()
-provider.givenQueryReturnResponse(
+provider.givenQueryReturn(
     // Respond to `.getOdd()`
     abi.encodePacked(IOddEven.getOdd.selector),
-    // Encode the response
-    MockProvider.ReturnData({
-        success: true,
-        data: abi.encodePacked(uint256(1))
-    }),
-    // Log the event
-    false
+    // With `true`
+    abi.encodePacked(uint256(1))
 );
 ```
 
@@ -115,16 +113,11 @@ And return the number `2` when `getEven` is called:
 
 ```solidity
 // Make it return 2 when calling .getEven()
-provider.givenQueryReturnResponse(
+provider.givenQueryReturn(
     // Respond to `.getEven()`
     abi.encodePacked(IOddEven.getEven.selector),
-    // Encode the response
-    MockProvider.ReturnData({
-        success: true,
-        data: abi.encodePacked(uint256(2))
-    }),
-    // Log the event
-    false
+    // With `2`
+    abi.encodePacked(uint256(2))
 );
 ```
 
@@ -174,13 +167,9 @@ provider.isEven(42) == false
 
 ### Logging requests
 
-When using `givenQueryReturnResponse` you can also log the request. The 3rd parameter is a boolean that indicates if the request should be logged.
+When using `givenQueryReturnResponse` or `givenSelectorReturnResponse` you can also log the requests. The 3rd parameter is a boolean that indicates if the request should be logged.
 
 Let's assume you want to test a contract that makes a call into an external contract. The external contract could be a smart contract that you do not develop, or one that already exists on the blockchain, or even a contract that you develop but needs a complex deployment system. Thus, you want that contract to be mocked and you need to know if it was called.
-
-In this example we need to implement a contract that reports even numbers (and only even numbers) to an external contract. Our unit test needs to check that the external contract is called with the correct arguments. We prefer not to create the external contract, thus we'll mock it and check if it was called.
-
-Check the [full example in the examples repository](https://github.com/cleanunicorn/mockprovider-examples/blob/e051cdb1e1eef4bdb1bb64d8ea1a5958b3a76869/src/reportNumber/ReportNumber.t.sol#L30-L58).
 
 ## Testing
 
