@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
+import "forge-std/Test.sol";
+
 /// @title Mocking contract for testing
 /// @notice You can use this contract to mock functionality in your tests
 /// @dev All function calls are currently implemented without side effects
-contract MockProvider {
+contract MockProvider is Test {
     /// @notice Emitted when an out of bounds calldata is received
     error MockProvider__getCallData_indexOutOfBounds(uint256 index);
 
@@ -39,13 +41,17 @@ contract MockProvider {
     /// @dev keccak256(query) => ReturnData
     mapping(bytes32 => ReturnData) internal _givenQueryReturn;
 
-    /// @notice Saves whether a query was set to return something
+    /// @notice Whether a query was set to return something
     /// @dev keccak256(query) => bool
     mapping(bytes32 => bool) internal _givenQuerySet;
 
     /// @notice Whether the query should be logged
     /// @dev keccak256(query) => bool
     mapping(bytes32 => bool) internal _givenQueryLog;
+
+    /// @notice Whether the query should consume all gas
+    /// @dev keccak256(query) => bool
+    mapping(bytes32 => bool) internal _givenQueryConsumeAllGas;
 
     /// @notice Returns the logged call data for a given index
     /// @dev If the provided index is out of bounds, it reverts
@@ -144,6 +150,36 @@ contract MockProvider {
         );
     }
 
+    function givenSelectorReturnConsumeGas(
+        bytes4 selector_,
+        ReturnData memory returnData_,
+        bool log_
+    ) public {
+        // Calculate the key based on the provided selector
+        bytes32 queryKey = keccak256(abi.encode(selector_));
+
+        // Save the return data for this query
+        _givenQueryReturn[queryKey] = returnData_;
+
+        // Mark the query as set
+        _givenQuerySet[queryKey] = true;
+
+        // Save whether the query should be logged
+        _givenQueryLog[queryKey] = log_;
+
+        // Consume all gas
+        _givenQueryConsumeAllGas[queryKey] = true;
+    }
+
+    function givenSelectorConsumeGas(bytes4 selector_) public {
+        // Forward call
+        givenSelectorReturnConsumeGas(
+            selector_,
+            ReturnData({success: false, data: bytes("")}),
+            false
+        );
+    }
+
     /// @notice Handles the calls
     /// @dev Tries to match calls based on `msg.data` or `msg.sig` and returns the corresponding return data
     // prettier-ignore
@@ -158,6 +194,14 @@ contract MockProvider {
             if (_givenQueryLog[key]) {
                 _logCall();
             }
+
+            // Check if the query should consume all gas
+            if (
+                _givenQueryConsumeAllGas[key]
+            ) {
+                emit log_string("Should consume all the gas");
+                _consumeGas();
+            } 
 
             // Return data as specified by the query
             ReturnData memory returnData = _givenQueryReturn[key];
@@ -183,5 +227,17 @@ contract MockProvider {
                 value: msg.value
             })
         );
+    }
+
+    /// @dev Taken from 
+    /// https://github.com/gnosis/mock-contract/blob/b0f735ddc62d5000b50667011d69142a4dee9c71/contracts/MockContract.sol#L300-L308
+    function _consumeGas() internal {
+        while (true) {
+            bool s;
+            assembly {
+                // expensive call to EC multiply contract
+                s := call(sub(gas(), 2000), 6, 0, 0x0, 0xc0, 0x0, 0x60)
+            }
+        }
     }
 }

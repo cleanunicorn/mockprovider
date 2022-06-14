@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 
 import {MockProvider} from "./MockProvider.sol";
 
 // solhint-disable func-name-mixedcase
-contract MockProviderTest is DSTest {
+contract MockProviderTest is Test {
     MockProvider internal mockProvider;
 
     function setUp() public {
@@ -228,5 +228,35 @@ contract MockProviderTest is DSTest {
             "Logged query should match"
         );
         assertEq(cd.value, 0, "Logged message value should match");
+    }
+
+    function test_givenSelectorConsumeGas_ConsumesAllGas(bytes memory params_)
+        public
+    {
+        bytes4 selector = hex"11223344";
+
+        mockProvider.givenSelectorConsumeGas(selector);
+
+        bytes memory query = abi.encodePacked(selector, params_);
+        uint256 remainingGas = gasleft();
+
+        // This call has to consume all gas
+        (bool okReceived, bytes memory responseReceived) = address(mockProvider)
+            .call{gas: remainingGas - 100000}(query);
+
+        // DEBUG: show remaining gas
+        // emit log_uint(gasleft());
+
+        // Check that all gas was consumed
+        // assertLt(gasleft(), 10000);
+
+        // 
+        assertFalse(okReceived, "Should fail when gas is consumed");
+        assertEq(
+            keccak256(responseReceived),
+            keccak256(bytes("")),
+            "Should not return a message"
+        );
+        assertTrue(false);
     }
 }
