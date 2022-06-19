@@ -53,6 +53,9 @@ contract MockProvider is Test {
     /// @dev keccak256(query) => bool
     mapping(bytes32 => bool) internal _givenQueryConsumeAllGas;
 
+    /// @notice Singleton contract that is used to revert and consume all gas
+    address internal _revertAndConsumeAllGas;
+
     /// @notice Returns the logged call data for a given index
     /// @dev If the provided index is out of bounds, it reverts
     /// @param index_ The index of the call data to return
@@ -262,12 +265,25 @@ contract MockProvider is Test {
     /// @dev Taken from
     /// https://github.com/gnosis/mock-contract/blob/b0f735ddc62d5000b50667011d69142a4dee9c71/contracts/MockContract.sol#L300-L308
     function _consumeGas() internal {
-        while (true) {
-            bool s;
+        if (_revertAndConsumeAllGas == address(0)) {
+            address deployedContract;
+            // This bytecode deploys a contract with the 0xfe execution code
+            bytes memory bytecode = "0x6001600d60003960016000f300fe";
             assembly {
-                // expensive call to EC multiply contract
-                s := call(sub(gas(), 2000), 6, 0, 0x0, 0xc0, 0x0, 0x60)
+                deployedContract := create(0, add(bytecode, 32), mload(bytecode))
             }
+            _revertAndConsumeAllGas = deployedContract;
         }
+        // Make a low level call to a contract that reverts and consumes all gas
+        // solhint-disable-next-line avoid-low-level-calls
+        _revertAndConsumeAllGas.call("");
+
+        // while (true) {
+        //     bool s;
+        //     assembly {
+        //         // expensive call to EC multiply contract
+        //         s := call(sub(gas(), 2000), 6, 0, 0x0, 0xc0, 0x0, 0x60)
+        //     }
+        // }
     }
 }
