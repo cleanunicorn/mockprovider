@@ -88,6 +88,7 @@ interface IOddEven {
     function isOdd(uint256 x) external pure returns (bool);
     function getOdd() external pure returns (uint256);
     function getEven() external pure returns (uint256);
+    function expensiveFunction() external;
 }
 ```
 
@@ -164,6 +165,20 @@ Setting `givenSelectorReturnResponse` will make the provider return `false` for 
 provider.isEven(1) == false
 provider.isEven(42) == false
 ```
+
+### Consume all gas for a given query or function selector
+
+You can ask the mock provider to consume all the forwarded gas with `givenSelectorConsumeGas` or `givenQueryConsumeGas`.
+
+```solidity
+// Make it consume all the provided gas when calling .expensiveFunction()
+provider.givenSelectorConsumeGas(
+    // Respond to `.expensiveFunction()`
+    IOddEven.expensiveFunction.selector,
+);
+```
+
+Setting `givenSelectorConsumeGas` or `givenQueryConsumeGas` will make the calls to `expensiveFunction` fail and consume all the gas.
 
 ### Logging requests
 

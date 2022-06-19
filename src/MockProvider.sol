@@ -150,7 +150,7 @@ contract MockProvider is Test {
         );
     }
 
-    function givenSelectorReturnConsumeGas(
+    function givenSelectorExecuteConsumeGas(
         bytes4 selector_,
         ReturnData memory returnData_,
         bool log_
@@ -171,10 +171,40 @@ contract MockProvider is Test {
         _givenQueryConsumeAllGas[queryKey] = true;
     }
 
+    function givenQueryExecuteConsumeGas(
+        bytes memory query_,
+        ReturnData memory returnData_,
+        bool log_
+    ) internal {
+        // Calculate the key based on the provided selector
+        bytes32 queryKey = keccak256(query_);
+
+        // Save the return data for this query
+        _givenQueryReturn[queryKey] = returnData_;
+
+        // Mark the query as set
+        _givenQuerySet[queryKey] = true;
+
+        // Save whether the query should be logged
+        _givenQueryLog[queryKey] = log_;
+
+        // Consume all gas
+        _givenQueryConsumeAllGas[queryKey] = true;
+    }    
+
     function givenSelectorConsumeGas(bytes4 selector_) public {
         // Forward call
-        givenSelectorReturnConsumeGas(
+        givenSelectorExecuteConsumeGas(
             selector_,
+            ReturnData({success: false, data: bytes("")}),
+            false
+        );
+    }
+
+    function givenQueryConsumeGas(bytes memory query_) public {
+        // Forward call
+        givenQueryExecuteConsumeGas(
+            query_,
             ReturnData({success: false, data: bytes("")}),
             false
         );
@@ -229,7 +259,7 @@ contract MockProvider is Test {
         );
     }
 
-    /// @dev Taken from 
+    /// @dev Taken from
     /// https://github.com/gnosis/mock-contract/blob/b0f735ddc62d5000b50667011d69142a4dee9c71/contracts/MockContract.sol#L300-L308
     function _consumeGas() internal {
         while (true) {

@@ -230,33 +230,59 @@ contract MockProviderTest is Test {
         assertEq(cd.value, 0, "Logged message value should match");
     }
 
-    function test_givenSelectorConsumeGas_ConsumesAllGas(bytes memory params_)
+    function test_givenSelectorConsumeGas_Consumes_AllGas(bytes memory params_)
         public
     {
         bytes4 selector = hex"11223344";
-
         mockProvider.givenSelectorConsumeGas(selector);
 
         bytes memory query = abi.encodePacked(selector, params_);
-        uint256 remainingGas = gasleft();
 
-        // This call has to consume all gas
+        uint256 initialGas = gasleft();
+        uint256 forwardGas = 100000;
+
+        // This call has to consume all the provided gas
         (bool okReceived, bytes memory responseReceived) = address(mockProvider)
-            .call{gas: remainingGas - 100000}(query);
+            .call{gas: forwardGas}(query);
 
-        // DEBUG: show remaining gas
-        // emit log_uint(gasleft());
+        // Check that all sent gas was consumed as per definition below
+        // remainingGas + forwardGas + c = initialGas
+        //
+        // initialGas - how much gas we started with before the call
+        // remainingGas - how much gas we have right now
+        // c - how much gas was consumed to set up the call and return;
+        //     this is difficult to hardcode or calculate, so we just
+        //     change the equality to be a bit more relaxed:
+        // remainingGas + forwardGas < initialGas
+        assertLt(gasleft() + forwardGas, initialGas, "Gas should be consumed");
 
-        // Check that all gas was consumed
-        // assertLt(gasleft(), 10000);
-
-        // 
         assertFalse(okReceived, "Should fail when gas is consumed");
         assertEq(
             keccak256(responseReceived),
             keccak256(bytes("")),
             "Should not return a message"
         );
-        assertTrue(false);
+    }
+
+    function test_givenQueryConsumeGas_Consumes_AllGas() public {
+        bytes memory query = hex"1122334455667788";
+        mockProvider.givenQueryConsumeGas(query);
+
+        uint256 initialGas = gasleft();
+        uint256 forwardGas = 100000;
+
+        // This call has to consume all the provided gas
+        (bool okReceived, bytes memory responseReceived) = address(mockProvider)
+            .call{gas: forwardGas}(query);
+
+        // Check that all sent gas was consumed
+        assertLt(gasleft() + forwardGas, initialGas, "Gas should be consumed");
+
+        assertFalse(okReceived, "Should fail when gas is consumed");
+        assertEq(
+            keccak256(responseReceived),
+            keccak256(bytes("")),
+            "Should not return a message"
+        );
     }
 }
