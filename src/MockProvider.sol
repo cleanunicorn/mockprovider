@@ -190,7 +190,7 @@ contract MockProvider is Test {
 
         // Consume all gas
         _givenQueryConsumeAllGas[queryKey] = true;
-    }    
+    }
 
     function givenSelectorConsumeGas(bytes4 selector_) public {
         // Forward call
