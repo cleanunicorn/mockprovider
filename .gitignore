@@ -12,3 +12,6 @@ out/
 
 # Foundry
 cache/
+
+# VSCode
+.vscode/
