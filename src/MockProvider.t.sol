@@ -17,10 +17,6 @@ contract MockProviderTest is Test {
         bytes memory query = hex"1122334455667788";
         uint256 queryValue = 1;
 
-        mockProvider.setDefaultResponse(
-            MockProvider.ReturnData({success: true, data: query})
-        );
-
         // solhint-disable-next-line avoid-low-level-calls
         address(mockProvider).call{value: queryValue}(query);
 
@@ -284,5 +280,47 @@ contract MockProviderTest is Test {
             keccak256(bytes("")),
             "Should not return a message"
         );
+    }
+
+    function test_enableLogging_LogsRequests() public {
+        bytes memory query = hex"11223344";
+        uint256 queryValue = 1;
+
+        // Enable arbitrary logging
+        mockProvider.enableLogging();
+
+        // solhint-disable-next-line avoid-low-level-calls
+        address(mockProvider).call{value: queryValue}(query);
+
+        // Get logged query
+        MockProvider.CallData memory cd = mockProvider.getCallData(0);
+
+        assertEq(cd.caller, address(this), "Logged caller should match");
+        assertEq(
+            cd.functionSelector,
+            bytes4(query),
+            "Logged query should match"
+        );
+        assertEq(
+            keccak256(cd.data),
+            keccak256(query),
+            "Logged query should match"
+        );
+        assertEq(cd.value, queryValue, "Logged message value should match");
+    }
+
+    function testFail_disableLogging_DisablesLogging() public {
+        // Disable logging
+        mockProvider.disableLogging();
+
+        // Define arbitrary query
+        bytes memory query = hex"11223344";
+        uint256 queryValue = 1;
+
+        // solhint-disable-next-line avoid-low-level-calls
+        address(mockProvider).call{value: queryValue}(query);
+
+        // Get logged query should fail since logging is disabled and index 0 is out of bounds
+        mockProvider.getCallData(0);
     }
 }

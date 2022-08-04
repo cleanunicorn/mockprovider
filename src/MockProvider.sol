@@ -45,6 +45,10 @@ contract MockProvider is Test {
     /// @dev keccak256(query) => bool
     mapping(bytes32 => bool) internal _givenQuerySet;
 
+    /// @notice Whether arbitrary queries should be logged
+    /// @dev starts as enabled
+    bool public loggingEnabled = true;
+
     /// @notice Whether the query should be logged
     /// @dev keccak256(query) => bool
     mapping(bytes32 => bool) internal _givenQueryLog;
@@ -62,6 +66,18 @@ contract MockProvider is Test {
             revert MockProvider__getCallData_indexOutOfBounds(index_);
         }
         return _callData[index_];
+    }
+
+    /// @notice Disables logging of arbitrary queries
+    /// @dev Any query that isn't explicitly set, will not be logged
+    function disableLogging() public {
+        loggingEnabled = false;
+    }
+
+    /// @notice Enables logging of arbitrary queries
+    /// @dev Any query that isn't explicitly set, will be logged
+    function enableLogging() public {
+        loggingEnabled = true;
     }
 
     /// @notice Defines the default return in case no query matches
@@ -240,7 +256,9 @@ contract MockProvider is Test {
         } 
 
         // Log the call
-        _logCall();
+        if (loggingEnabled) {
+            _logCall();
+        }
 
         // Default to sending the default response
         return _defaultReturnData.data;
